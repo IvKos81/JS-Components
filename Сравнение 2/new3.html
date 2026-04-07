@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Image Comparison Sliders</title>
+    <style>
+        .comparison-container {
+            position: relative;
+            max-width: 800px;
+            margin: 2rem auto;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .image-container {
+            position: relative;
+            height: 500px;
+        }
+
+        .image-before,
+        .image-after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-before {
+            width: 50%;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .slider-handle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 100%;
+            width: 4px;
+            background: #fff;
+            cursor: col-resize;
+            z-index: 3;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .handle-circle {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .handle-circle::after,
+        .handle-circle::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 2px;
+            background: #333;
+        }
+
+        .handle-circle::after {
+            transform: rotate(45deg);
+            margin-left: -4px;
+        }
+
+        .handle-circle::before {
+            transform: rotate(-45deg);
+            margin-right: -4px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                margin: 1rem;
+            }
+            
+            .image-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- First Slider -->
+    <div class="comparison-container">
+        <div class="image-container">
+            <img src="https://picsum.photos/800/500?random=1" class="image-after" alt="After">
+            <div class="image-before">
+                <img src="https://picsum.photos/800/500?random=2" alt="Before">
+            </div>
+            <div class="slider-handle">
+                <div class="handle-circle"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Slider -->
+    <div class="comparison-container">
+        <div class="image-container">
+            <img src="https://picsum.photos/800/500?random=3" class="image-after" alt="After">
+            <div class="image-before">
+                <img src="https://picsum.photos/800/500?random=4" alt="Before">
+            </div>
+            <div class="slider-handle">
+                <div class="handle-circle"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Third Slider -->
+    <div class="comparison-container">
+        <div class="image-container">
+            <img src="https://picsum.photos/800/500?random=5" class="image-after" alt="After">
+            <div class="image-before">
+                <img src="https://picsum.photos/800/500?random=6" alt="Before">
+            </div>
+            <div class="slider-handle">
+                <div class="handle-circle"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ImageComparison {
+            constructor(container) {
+                this.container = container;
+                this.beforeContainer = container.querySelector('.image-before');
+                this.handle = container.querySelector('.slider-handle');
+                this.isDragging = false;
+                this.currentX = 0;
+                
+                this.initEvents();
+                this.setPosition(50); // Initial position
+            }
+
+            initEvents() {
+                const handleDragStart = (e) => {
+                    e.preventDefault();
+                    this.startDragging();
+                };
+
+                this.handle.addEventListener('mousedown', handleDragStart);
+                document.addEventListener('mousemove', (e) => this.handleDragMove(e));
+                document.addEventListener('mouseup', () => this.stopDragging());
+                
+                // Touch events
+                this.handle.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.startDragging();
+                });
+                document.addEventListener('touchmove', (e) => this.handleDragMove(e.touches[0]));
+                document.addEventListener('touchend', () => this.stopDragging());
+            }
+
+            startDragging() {
+                this.isDragging = true;
+                this.container.style.userSelect = 'none';
+                this.container.style.cursor = 'col-resize';
+            }
+
+            stopDragging() {
+                this.isDragging = false;
+                this.container.style.userSelect = '';
+                this.container.style.cursor = 'default';
+            }
+
+            handleDragMove(e) {
+                if (!this.isDragging) return;
+                
+                const rect = this.container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percentage = (x / rect.width) * 100;
+                
+                this.setPosition(Math.max(0, Math.min(100, percentage)));
+            }
+
+            setPosition(percentage) {
+                this.beforeContainer.style.width = `${percentage}%`;
+                this.handle.style.left = `${percentage}%`;
+            }
+        }
+
+        // Initialize all sliders
+        document.addEventListener('DOMContentLoaded', () => {
+            const containers = document.querySelectorAll('.comparison-container');
+            containers.forEach(container => {
+                new ImageComparison(container);
+            });
+        });
+    </script>
+</body>
+</html>
