@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адаптивный слайдер</title>
+    <style>
+        .slider {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+
+        .slide {
+            flex: 0 0 100%;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        .slider-arrows {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .arrow {
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .dot.active {
+            background: #333;
+        }
+
+        @media (min-width: 768px) {
+            .slide {
+                flex: 0 0 50%;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .slide {
+                flex: 0 0 25%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slider">
+        <div class="slider-wrapper">
+            <div class="slide">Slide 1</div>
+            <div class="slide">Slide 2</div>
+            <div class="slide">Slide 3</div>
+            <div class="slide">Slide 4</div>
+            <div class="slide">Slide 5</div>
+            <div class="slide">Slide 6</div>
+            <div class="slide">Slide 7</div>
+            <div class="slide">Slide 8</div>
+        </div>
+        <div class="slider-arrows">
+            <button class="arrow prev">←</button>
+            <button class="arrow next">→</button>
+        </div>
+        <div class="slider-dots"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.querySelector('.slider');
+            const wrapper = document.querySelector('.slider-wrapper');
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.arrow.prev');
+            const nextBtn = document.querySelector('.arrow.next');
+            const dotsContainer = document.querySelector('.slider-dots');
+
+            let currentIndex = 0;
+            let slidesPerView = 1;
+            let maxIndex = slides.length - slidesPerView;
+
+            function updateParams() {
+                if (window.innerWidth >= 992) {
+                    slidesPerView = 4;
+                } else if (window.innerWidth >= 768) {
+                    slidesPerView = 2;
+                } else {
+                    slidesPerView = 1;
+                }
+                maxIndex = Math.max(slides.length - slidesPerView, 0);
+                if (currentIndex > maxIndex) currentIndex = maxIndex;
+                createDots();
+                updatePosition();
+            }
+
+            function updatePosition() {
+                const translateX = (currentIndex * (100 / slidesPerView));
+                wrapper.style.transform = `translateX(-${translateX}%)`;
+                updateDots();
+            }
+
+            function createDots() {
+                dotsContainer.innerHTML = '';
+                const dotsCount = Math.ceil(slides.length / slidesPerView);
+                for (let i = 0; i < dotsCount; i++) {
+                    const dot = document.createElement('button');
+                    dot.classList.add('dot');
+                    if (i === Math.floor(currentIndex / slidesPerView)) {
+                        dot.classList.add('active');
+                    }
+                    dot.addEventListener('click', () => {
+                        currentIndex = i * slidesPerView;
+                        updatePosition();
+                    });
+                    dotsContainer.appendChild(dot);
+                }
+            }
+
+            function updateDots() {
+                const dots = document.querySelectorAll('.dot');
+                const activeDotIndex = Math.floor(currentIndex / slidesPerView);
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === activeDotIndex);
+                });
+            }
+
+            prevBtn.addEventListener('click', () => {
+                currentIndex = Math.max(currentIndex - slidesPerView, 0);
+                updatePosition();
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentIndex = Math.min(currentIndex + slidesPerView, maxIndex);
+                updatePosition();
+            });
+
+            window.addEventListener('resize', updateParams);
+
+            // Инициализация
+            updateParams();
+        });
+    </script>
+</body>
+</html>
